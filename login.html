@@ -120,44 +120,51 @@ Login As
 
 
 <!-- Mobile -->
-
 <div class="input-box">
 
+    <label>
+        Mobile Number
+    </label>
 
-<label>
+    <div class="phone-input">
 
-Mobile Number
+        <span>+91</span>
 
-</label>
+        <input
+            id="phoneNumber"
+            type="tel"
+            placeholder="Enter Mobile Number"
+            maxlength="10">
 
-
-<div class="phone-input">
-
-<span>
-
-+91
-
-</span>
-
-
-<input type="tel"
-placeholder="Enter Mobile Number"
-maxlength="10">
-
+    </div>
 
 </div>
 
+<button
+    id="sendOtpBtn"
+    class="otp-btn">
 
-</div>
-
-
-
-<button class="otp-btn">
-
-Send OTP
+    Send OTP
 
 </button>
+
 <div id="recaptcha-container"></div>
+
+<div id="otpSection" style="display:none;">
+
+    <input
+        id="otp"
+        type="text"
+        placeholder="Enter OTP">
+
+    <button
+        id="verifyOtpBtn">
+
+        Verify OTP
+
+    </button>
+
+</div>
 <!-- ==============================
      OTP Verification Section
 ================================ -->
