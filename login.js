@@ -1,262 +1,163 @@
-/* ==========================================
-   Ramphal Memorial Inter College
-   Login JS
-   Part 3
-========================================== */
+// ==========================
+// Ramphal School Portal
+// Login.js - Part 1
+// ==========================
 
+import { auth } from "./firebase-config.js";
 
-/* ===============================
-   Select Elements
-================================ */
+import {
+    RecaptchaVerifier,
+    signInWithPhoneNumber
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-const roles = document.querySelectorAll(".role");
 
-const otpButton = document.querySelector(".otp-btn");
+// ==========================
+// Elements
+// ==========================
 
-const mobileInput = document.querySelector(
-".phone-input input"
-);
+const phoneInput =
+document.getElementById("phoneNumber");
 
-
-/* ===============================
-   Role Selection
-================================ */
-
-let selectedRole = "Student";
-
-
-roles.forEach(role=>{
-
-
-    role.addEventListener(
-    "click",
-    ()=>{
-
-
-        roles.forEach(item=>{
-
-            item.classList.remove("active");
-
-        });
-
-
-        role.classList.add("active");
-
-
-        selectedRole =
-        role.innerText;
-
-
-        console.log(
-        "Selected Role:",
-        selectedRole
-        );
-
-
-    });
-
-
-});
-
-
-
-/* ===============================
-   Mobile Validation
-================================ */
-
-
-function validateMobile(number){
-
-
-    const pattern =
-    /^[0-9]{10}$/;
-
-
-    return pattern.test(number);
-
-
-}
-
-
-
-/* ===============================
-   Send OTP
-================================ */
-
-
-otpButton.addEventListener(
-"click",
-()=>{
-
-
-    const mobile =
-    mobileInput.value.trim();
-
-
-
-    if(mobile===""){
-
-
-        alert(
-        "Please Enter Mobile Number"
-        );
-
-
-        return;
-
-
-    }
-
-
-
-    if(!validateMobile(mobile)){
-
-
-        alert(
-        "Enter Valid 10 Digit Mobile Number"
-        );
-
-
-        return;
-
-
-    }
-
-
-
-    console.log({
-
-        role:selectedRole,
-
-        mobile:mobile
-
-    });
-
-
-
-    alert(
-    "OTP Sent Successfully"
-    );
-
-
-    /*
-       Next Step:
-       OTP Verification Screen
-    */
-
-
-});
-
-/* ===============================
-   OTP Section Logic
-================================ */
-
+const sendOtpBtn =
+document.getElementById("sendOtpBtn");
 
 const otpSection =
 document.getElementById("otpSection");
 
-
-const verifyBtn =
-document.querySelector(".verify-btn");
-
+const otpInput =
+document.getElementById("otp");
 
 
-otpButton.addEventListener(
-"click",
-()=>{
+// ==========================
+// Global Variables
+// ==========================
+
+let confirmationResult = null;
 
 
-    const mobile =
-    mobileInput.value.trim();
+// ==========================
+// Create reCAPTCHA
+// ==========================
 
+window.recaptchaVerifier =
+new RecaptchaVerifier(auth,
+"recaptcha-container",
+{
 
-    if(validateMobile(mobile)){
+size:"normal",
 
+callback:()=>{
 
-        otpSection.style.display="block";
-
-
-    }
-
-
-});
-
-
-
-/* OTP Input Auto Move */
-
-const otpInputs =
-document.querySelectorAll(
-".otp-boxes input"
-);
-
-
-otpInputs.forEach(
-(input,index)=>{
-
-
-input.addEventListener(
-"input",
-()=>{
-
-
-    if(input.value.length===1
-    &&
-    index < otpInputs.length-1){
-
-
-        otpInputs[index+1].focus();
-
-
-    }
-
-
-});
-
-
-});
-
-
-
-/* Verify OTP */
-
-verifyBtn.addEventListener(
-"click",
-()=>{
-
-
-let otp="";
-
-
-otpInputs.forEach(input=>{
-
-    otp += input.value;
-
-});
-
-
-if(otp.length===6){
-
-
-    alert(
-    "OTP Verified Successfully"
-    );
-
-
-    // Next:
-    // Redirect Dashboard
-
-
-}
-else{
-
-
-    alert(
-    "Enter Complete OTP"
-    );
-
+console.log("reCAPTCHA Verified");
 
 }
 
+});
+
+
+// ==========================
+// Send OTP
+// ==========================
+
+sendOtpBtn.addEventListener("click",()=>{
+
+let number =
+phoneInput.value.trim();
+
+
+// Empty Check
+
+if(number===""){
+
+alert("Please Enter Mobile Number");
+
+return;
+
+}
+
+
+// Length Check
+
+if(number.length!==10){
+
+alert("Enter Valid 10 Digit Number");
+
+return;
+
+}
+
+
+// Country Code
+
+number="+91"+number;
+
+
+// Send OTP
+
+signInWithPhoneNumber(
+auth,
+number,
+window.recaptchaVerifier
+)
+
+.then((result)=>{
+
+confirmationResult=result;
+
+alert("OTP Sent Successfully");
+
+otpSection.style.display="block";
+
+})
+
+.catch((error)=>{
+
+alert(error.message);
+
+console.log(error);
+
+});
+
+});
+
+// ==========================
+// Verify OTP
+// ==========================
+
+const verifyOtpBtn =
+document.getElementById("verifyOtpBtn");
+
+verifyOtpBtn.addEventListener("click",()=>{
+
+let otp =
+otpInput.value.trim();
+
+if(otp===""){
+
+alert("Enter OTP");
+
+return;
+
+}
+
+confirmationResult.confirm(otp)
+
+.then((result)=>{
+
+const user=result.user;
+
+alert("Login Successful");
+
+window.location.href="student-dashboard.html";
+
+})
+
+.catch((error)=>{
+
+alert("Invalid OTP");
+
+console.log(error);
+
+});
 
 });
